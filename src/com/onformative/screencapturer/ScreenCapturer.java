@@ -4,6 +4,12 @@ import java.awt.Point;
 
 import processing.core.PImage;
 
+/**
+ * ScreenCapturer.java
+ * last edit: 05.10.2012
+ * author: marcel schwittlick
+ *
+ */
 public class ScreenCapturer {
 
   /**
