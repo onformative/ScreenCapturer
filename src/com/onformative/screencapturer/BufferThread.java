@@ -12,18 +12,18 @@ import processing.core.PImage;
  * Bufferthread.java last edited: 05.10.2012 author: marcel schwittlick
  * 
  */
-public class BufferThread extends Thread {
+class BufferThread extends Thread {
   public int wait;
   private boolean running;
-  private static Robot robot;
+  public static Robot robot;
 
   /**
    * the constructor initializes the buffer and only takes the destinated waiting time
    * 
    * @param wait
    */
-  public BufferThread(int wait) {
-    this.wait = wait;
+  public BufferThread(float wait) {
+    this.wait = (int) wait;
     running = false;
     try {
       robot = new Robot();
@@ -43,6 +43,8 @@ public class BufferThread extends Thread {
     super.start();
   }
 
+
+
   /**
    * gets executed once and runs as long as the running boolean is set to true
    */
@@ -58,14 +60,17 @@ public class BufferThread extends Thread {
   }
 
   public void quit() {
+    running = false;
     System.out.println("ScreenCapturer thread quit.");
+    interrupt();
   }
 
   /**
    * sends a new capture to the screen class
    */
   private void updateImage() {
-    Screen.setCurrentImage(getImage());
+    Screen.setCurrentImage(getImage(true));
+    Screen.setOriginalImage(getImage(false));
   }
 
   /**
@@ -73,20 +78,29 @@ public class BufferThread extends Thread {
    * 
    * @return PImage a pimage of the new capture
    */
-  private PImage getImage() {
+  private PImage getImage(boolean toBeResized) {
     PImage currentImage = new PImage();
     if (Screen.getWindow() != null) {
       try {
-        BufferedImage image =
-            robot.createScreenCapture(new Rectangle(Screen.getWindow().getLocation().x + 5, Screen
-                .getWindow().getLocation().y + 28, Screen.getWindow().getWidth() - 10, Screen
-                .getWindow().getHeight() - 33));
+        BufferedImage image = null;
+        if (System.getProperty("os.name").contains("OS X")) {
+          image =
+              robot.createScreenCapture(new Rectangle(Screen.getWindow().getLocation().x + 5,
+                  Screen.getWindow().getLocation().y + 27, Screen.getWindow().getWidth() - 10,
+                  Screen.getWindow().getHeight() - 32));
+        } else {
+          image =
+              robot.createScreenCapture(new Rectangle(Screen.getWindow().getLocation().x + 5,
+                  Screen.getWindow().getLocation().y + 28, Screen.getWindow().getWidth() - 10,
+                  Screen.getWindow().getHeight() - 33));
+        }
         currentImage = new PImage(image);
       } catch (NullPointerException e) {
         e.printStackTrace();
       }
-      currentImage
-          .resize((int) Screen.getWindow().getWidth(), (int) Screen.getWindow().getHeight());
+      if (toBeResized) {
+        currentImage.resize(Screen.width, Screen.height);
+      }
     }
     return currentImage;
   }
